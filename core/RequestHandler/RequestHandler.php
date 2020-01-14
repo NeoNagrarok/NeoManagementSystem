@@ -1,6 +1,6 @@
 <?php
 
-include_once 'php/files/files.php';
+include_once 'core/files/files.php';
 
 class RequestHandler
 {

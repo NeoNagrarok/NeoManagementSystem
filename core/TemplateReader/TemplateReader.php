@@ -1,6 +1,6 @@
 <?php
-	include_once 'php/files/files.php';
-	include_once 'php/TemplateReader/functions.php';
+	include_once 'core/files/files.php';
+	include_once 'core/TemplateReader/functions.php';
 	
 	// TODO make some tpl files for header, main, footer and test php injection with $ symbol. After may be create a php translater (see one of the next to do ;) )
 
