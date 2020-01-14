@@ -42,9 +42,10 @@
 		
 		private function funcFunction($value)
 		{
-			$func = preg_replace('/\[\?(.*)]/', '$1', $value);
-			if (function_exists($func))
-				return $func($this->tabVar['prev']);
+			$func = explode(':', preg_replace('/\[\?(.*:?.*)]/', '$1', $value));
+			$arg = isset($func[1]) ? $func[1] : NULL;
+			if (function_exists($func[0]))
+				return $func[0]($this->tabVar['prev'], $arg);
 		}
 		
 		private function funcVariable($value)
