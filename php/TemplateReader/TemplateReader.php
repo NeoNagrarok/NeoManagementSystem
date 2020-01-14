@@ -16,9 +16,11 @@
 			$this->tabVar['prev'] = $prev;
 		}
 		
-		public function setPage($context, $page)
+		public function setPage($context, $page, $theme)
 		{
-			$this->tabVar['page'] = $this->getHTML($context, $context . '/' . $page);
+//			echo $context . '/' . $theme . '/' . $page . '<br />';
+			$this->theme = $theme;
+			$this->tabVar['page'] = $this->getHTML($context, $context . '/' . $theme . '/' . $page);
 			$this->tabVar['description'] = 'defaultDescription';
 			$this->tabVar['title'] = 'defaultTitle';
 			// TODO find a way to fill these two previous variables with data in tpl files ? May be thanks to php interpreter ? Or with an other verb ?
@@ -27,6 +29,7 @@
 		
 		public function getHTML($context, $tpl)
 		{
+			echo $tpl . '<br />';
 			$this->context = $context;
 			$contentTpl = getContentFile($tpl);
 //			echo htmlspecialchars($contentTpl) . '<hr />';
@@ -36,16 +39,17 @@
 		
 		private function funcInclude($value)
 		{
-			$file = $this->context . '/' . preg_replace('/\[#(.*)]/', '$1', $value) . '.tpl';
+			$file = $this->context . '/' . $this->theme . '/' . preg_replace('/\[#(.*)]/', '$1', $value) . '.tpl';
 			return $this->getHTML($this->context, $file);
 		}
 		
 		private function funcFunction($value)
 		{
 			$func = explode(':', preg_replace('/\[\?(.*:?.*)]/', '$1', $value));
-			$arg = isset($func[1]) ? $func[1] : NULL;
+			$arg = 'themes/' . $this->theme;
+			$arg = isset($func[1]) ? $func[1] . '/' . $this->theme : $arg;
 			if (function_exists($func[0]))
-				return $func[0]($this->tabVar['prev'], $arg);
+				return $func[0]($this->tabVar['prev'], $arg );
 		}
 		
 		private function funcVariable($value)
@@ -93,7 +97,7 @@
 
 		private $context;
 		private $tabVar;
-		
+		private $theme;
 	}
 
 ?>

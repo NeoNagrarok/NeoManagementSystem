@@ -3,5 +3,5 @@
 	[#header]
 	[#main]
 	[#footer]
-	[?loadJs]
+	[?loadJs:admin]
 [?bodyOf]

@@ -47,6 +47,10 @@ class RequestHandler
 		$tabPages['admin']['home'] = 'tpl';
 		$page = 'home';
 		
+		/* TODO */
+		$theme = 'defaultTheme';
+		/* TODO put here the code to choose an other theme if we had set an other theme for our cms ! */
+		
 		if (isset($this->tabRoute[0]))
 		{
 			if (isset($tabContext[$this->tabRoute[0]]))
@@ -54,7 +58,7 @@ class RequestHandler
 			if ($this->tabRoute[0] != 'admin')
 				$page = $this->tabRoute[0];
 		}
-		$mainTpl = $context . '/index.tpl';
+		$mainTpl = $context . '/' . $theme . '/index.tpl';
 		if (isset($this->tabRoute[1]))
 			$page = $this->tabRoute[1];
 		if (isset($tabPages[$context][$page]))
@@ -62,7 +66,7 @@ class RequestHandler
 		else
 			$page = '404.tpl';
 		$TemplateReader->setPrev($this->prev);
-		$TemplateReader->setPage($context, $page);
+		$TemplateReader->setPage($context, $page, $theme);
 //		echo htmlspecialchars($TemplateReader->getHTML($context, $mainTpl));
 		echo $TemplateReader->getHTML($context, $mainTpl);
 	}

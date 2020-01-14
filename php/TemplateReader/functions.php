@@ -12,9 +12,7 @@ function bodyOf($prev, $arg)
 
 function loadCss($prev, $arg)
 {
-	$dir = '';
-	if ($arg)
-		$dir = $arg . '/';
+	$dir = $arg . '/';
 	$css = '';
 	$tabDir = getContentDir($dir . 'css/');
 	if ($tabDir)
@@ -26,12 +24,10 @@ function loadCss($prev, $arg)
 
 function loadJs($prev, $arg)
 {
-	$dir = '';
-	if ($arg)
-		$dir = $arg . '/';
+	$dir = $arg . '/';
 	// TODO add json fihome/le or other solution in order to know in advance the load order, else it may cause some problem in term of depency.
 	$js = '';
-	$tabDir = getContentDir('js/');
+	$tabDir = getContentDir($dir . 'js/');
 	foreach($tabDir as $jsFile)
 		if (preg_match('/.*\.js$/', $jsFile))
 			$js .= '<script src="' . $prev . $dir . 'js/' . $jsFile . '"></script>';

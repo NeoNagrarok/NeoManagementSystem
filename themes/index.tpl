@@ -1,7 +1,0 @@
-[#metaHead]
-[?bodyOn]
-	[#header]
-	[#main]
-	[#footer]
-	[?loadJs]
-[?bodyOf]
