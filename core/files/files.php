@@ -58,7 +58,7 @@ function getContentDir($dirPath)
 
 function createFolder($path)
 {
-	mkdir($path, 0777, true);
+	mkdir($path, 0644, true);
 }
 
 function copyAll($path, $dest)

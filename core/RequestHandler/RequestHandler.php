@@ -57,6 +57,9 @@ class RequestHandler
 				$context = $tabContext[$this->tabRoute[0]];
 			if ($this->tabRoute[0] != 'admin')
 				$page = $this->tabRoute[0];
+			else
+				$theme = 'defaultAdminTheme';
+				/* TODO put here the code to choose an other admin theme if we had set an other theme for our cms ! */
 		}
 		$mainTpl = $context . '/' . $theme . '/index.tpl';
 		if (isset($this->tabRoute[1]))

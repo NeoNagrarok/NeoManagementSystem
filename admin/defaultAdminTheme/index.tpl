@@ -1,7 +1,5 @@
+[?session]
 [#metaHead]
 [?bodyOn]
-	[#header]
 	[#main]
-	[#footer]
-	[?loadJs:admin]
 [?bodyOf]

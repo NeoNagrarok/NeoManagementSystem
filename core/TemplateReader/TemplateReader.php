@@ -29,7 +29,7 @@
 		
 		public function getHTML($context, $tpl)
 		{
-			echo $tpl . '<br />';
+//			echo $tpl . '<br />';
 			$this->context = $context;
 			$contentTpl = getContentFile($tpl);
 //			echo htmlspecialchars($contentTpl) . '<hr />';
@@ -60,7 +60,7 @@
 			return 'This value doesn\'t exist.';
 		}
 		
-		private function parser($contentTpl)
+		public function parser($contentTpl)
 		{
 			$html = '';
 			$tabAction['#'] = 'funcInclude';
