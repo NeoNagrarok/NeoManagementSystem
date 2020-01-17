@@ -1,14 +1,13 @@
 <?php
 	include_once 'core/files/files.php';
 	include_once 'core/TemplateReader/functions.php';
-	
-	// TODO make some tpl files for header, main, footer and test php injection with $ symbol. After may be create a php translater (see one of the next to do ;) )
 
 	class TemplateReader
 	{
 		public function __construct()
 		{
 //			echo 'TemplateReaderConstruct<br />';
+			$this->listIf['__first__'] = 'true';
 		}
 		
 		public function setPrev($prev)
@@ -36,6 +35,11 @@
 			$html = $this->parser($contentTpl);
 			return $html;
 		}
+//		
+//		public function setTheme($theme)
+//		{
+//			$this->theme = $theme;
+//		}
 		
 		private function funcInclude($value)
 		{
@@ -46,10 +50,12 @@
 		private function funcFunction($value)
 		{
 			$func = explode(':', preg_replace('/\[\?(.*:?.*)]/', '$1', $value));
-			$arg = 'themes/' . $this->theme;
-			$arg = isset($func[1]) ? $func[1] . '/' . $this->theme : $arg;
+			$args[0] = 'themes/' . $this->theme;
+			$args[0] = isset($func[1]) ? $func[1] . '/' . $this->theme : $args[0];
+			$args[1] = &$this->listIf;
+			$args[2] = &$this;
 			if (function_exists($func[0]))
-				return $func[0]($this->tabVar['prev'], $arg );
+				return $func[0]($this->tabVar['prev'], $args);
 		}
 		
 		private function funcVariable($value)
@@ -67,21 +73,25 @@
 			$tabAction['?'] = 'funcFunction';
 			$tabAction['$'] = 'funcVariable';
 
-			preg_match_all('/<\?php[\s\S]*\?>|\[.*]|<.*\/>|<.*>.*<\/.*>|.*/U', $contentTpl, $array);
+			preg_match_all('/<\?php[\s\S]*\?>|\[.*]|<.*\/>|<.*>.*<\/.*>|<.*>|<\/.*>|.*/U', $contentTpl, $array);
 			$array = $array[0];
 			foreach ($array as $element)
 			{
+//				echo end($this->listIf) . ' --- ' . htmlspecialchars($element) . '<br />';
 				if (isset($element[1]) && isset($tabAction[$element[1]]))
+				{
 					if ($element[0] == '[')
 					{
 						$func = $tabAction[$element[1]];
-						$html .= $this->$func($element);
+						$return = $this->$func($element);
+						if(end($this->listIf) === 'true')
+							$html .= $return;
 					}
-					else
+					else if(end($this->listIf) === 'true')
 						$html .= eval(preg_replace('/<\?php(.*)\?>/', '$1', preg_replace('/\n/', ' ', $element)));
-				else
+				}
+				else if (end($this->listIf) === 'true')
 				{
-					// TODO do it if we have many tpl markup on the same line ...
 					if (preg_match('/.*\[.*].*/', $element))
 					{
 						$tag = preg_replace('/.*(\[.*]).*/', '$1', $element);
@@ -90,7 +100,6 @@
 					}
 					$html .= $element;
 				}
-				// TODO find a way to put persistent data from tpl file in order to use theim may be in other tpl file and later ? Like mysql use ?
 			}
 			return $html;
 		}
@@ -98,6 +107,7 @@
 		private $context;
 		private $tabVar;
 		private $theme;
+		private $listIf;
 	}
 
 ?>

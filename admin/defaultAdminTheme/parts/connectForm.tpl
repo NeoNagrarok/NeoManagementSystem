@@ -1,3 +1,4 @@
+<p>Second TEST</p>
 <form action="./" method="post">
 	<fieldset>
 		<legend><label for="adId">Identifiant</label></legend>
@@ -9,3 +10,4 @@
 	</fieldset>
 	<input type="submit" value="Envoyer" />
 </form>
+<p>TOTO IS BACK</p>

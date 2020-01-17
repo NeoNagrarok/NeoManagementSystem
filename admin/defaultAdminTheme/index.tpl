@@ -1,4 +1,3 @@
-[?session]
 [#metaHead]
 [?bodyOn]
 	[#main]

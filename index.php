@@ -1,4 +1,6 @@
 <?php
+	session_start();
+	
 	include_once 'core/RequestHandler/RequestHandler.php';
 	include_once 'core/TemplateReader/TemplateReader.php';
 	

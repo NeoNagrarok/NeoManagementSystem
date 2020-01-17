@@ -43,7 +43,9 @@ class RequestHandler
 		$tabContext['admin'] = 'admin'; /* [routeVar] = 'folder where to search index.tpl' */
 		$context = 'themes'; /* Default folder where to search index.tpl */
 		
+		/* TODO get the good list of pages from where data are stored !!! */
 		$tabPages['themes']['home'] = 'tpl';
+		$tabPages['themes']['adminTest'] = 'tpl';
 		$tabPages['admin']['home'] = 'tpl';
 		$page = 'home';
 		
@@ -74,7 +76,7 @@ class RequestHandler
 		echo $TemplateReader->getHTML($context, $mainTpl);
 	}
 
-	private $route; /* All levels of route : /test/toto/ok */
+	private $route; /* All levels of route : /test/toto/ok/ */
 	private $getParameters; /* string with all parameters */
 	private $tabRoute; /* Each level of url : /test/toto/ok => [0] = test [1] = toto etc. */
 	private $prev; /* ../ or ../../ or ../../../ etc. */
