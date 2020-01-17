@@ -93,6 +93,23 @@ function connect($prev, $args)
 	}
 }
 
+function disconnect($prev, $args)
+{
+	if (isset($_SESSION['logged']))
+	{
+		if (isset($_POST['disconnect']))
+		{
+			session_destroy();
+			header('location: ./');
+		}
+		else
+			return '<form action="./" method="post">
+						<input type="submit" name="disconnect" value="Se déconnecter" />
+					</form>';
+	}
+	return '';
+}
+
 function ifRank($prev, &$args)
 {
 	$rank = explode('/', $args[0])[0];
