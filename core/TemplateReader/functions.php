@@ -1,5 +1,39 @@
 <?php
 
+// TODO see later to remake it better
+function dbConnexion()
+{
+	try
+	{
+		$db = new PDO('mysql:host=192.168.1.30;charset=utf8', 'root', 'dadfba16');
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$sql = "CREATE DATABASE IF NOT EXISTS nms";
+		$db->exec($sql);
+		$db->query("use nms");
+		$sql = 'CREATE TABLE IF NOT EXISTS `content` (
+				`id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+				`title` varchar(50),
+				`type` varchar(20),
+				`code_chmod` varchar(3) NOT NULL,
+				`slug` varchar(20),
+				`date` date,
+				PRIMARY KEY (`id`))';
+		$db->exec($sql);
+				$sql = 'CREATE TABLE IF NOT EXISTS `contentModel` (
+				`id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+				`type` varchar(20) NOT NULL,
+				`inner` json,
+				`order` int UNSIGNED,
+				PRIMARY KEY (`id`))';
+		$db->exec($sql);
+	}
+	catch (Exception $e)
+	{
+		    die('Erreur : ' . $e->getMessage());
+	}
+	return $db;
+}
+
 function bodyOn($prev, $args)
 {
 	return '<body id="test">';
@@ -132,6 +166,71 @@ function fi($prev, &$args)
 		unset($args[1][$rank]);
 	}
 	return '';
+}
+
+function admMenu($prev, &$args)
+{
+	$prev = preg_replace('/^..\//', '', $prev);
+	$db = dbConnexion();
+	$return = '';
+	foreach ($db->query('select type from contentModel order by `order`') as $row)
+		$return .= '<a href="' . $prev . 'content/' . $row['type'] . '">' . $row['type'] . '</a>';
+	return $return;
+}
+
+function getContentTitle($prev, &$args)
+{
+	$prev = preg_replace('/^..\//', '', $prev);
+	if (!isset($args[3][2]))
+	{
+		header('location: ' . $prev);
+		exit;
+	}
+	return $args[3][2];
+}
+
+function addContentLink($prev, &$args)
+{
+	$prev = preg_replace('/^..\//', '', $prev);
+	return '<a href="' . $prev . 'addContent">Add content</a><hr />';
+}
+
+function addContent($prev, &$args)
+{
+	if (isset($_POST['contentTitle']) && isset($_POST['contentOrder']))
+	{
+		$title = htmlspecialchars($_POST['contentTitle']);
+		$order = (int) htmlspecialchars($_POST['contentOrder']) * 10;
+		$db = dbConnexion();
+		$prepReq = $db->prepare("INSERT INTO contentModel (type, `order`) VALUES (:type, :order)");
+		$prepReq->bindParam(':type', $title);
+		$prepReq->bindParam(':order', $order);
+		$prepReq->execute();
+		header('location: ../content/' . $title);
+		exit;
+	}
+	return '';
+}
+
+function lastFieldAdded($prev, &$args)
+{
+	if (isset($_POST['addField']))
+	{
+		$lastFieldAdded = htmlspecialchars($_POST['addField']);
+		$form = '<form method="post" action="./">';
+		$form = '<p>Type ' . $lastFieldAdded . '</p>';
+		$form .= '<label for="lastFieldAdded" title="It\'s name will be also it\'s class and it\'s id">Name : <input type="' .
+			$lastFieldAdded . '" id="lastFieldAdded" name="lastFieldAdded" />';
+		$form .= '<br />';
+		$form .= '<button type="submit">Validate</button>';
+		$form .= '</form>';
+		return $form;
+	}
+}
+
+function listContentInner($prev, &$args)
+{
+	return 'Content inner list';
 }
 
 ?>

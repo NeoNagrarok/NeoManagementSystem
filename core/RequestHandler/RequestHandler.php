@@ -47,6 +47,8 @@ class RequestHandler
 		$tabPages['themes']['home'] = 'tpl';
 		$tabPages['themes']['adminTest'] = 'tpl';
 		$tabPages['admin']['home'] = 'tpl';
+		$tabPages['admin']['addContent'] = 'tpl';
+		$tabPages['admin']['content'] = 'tpl';
 		$page = 'home';
 		
 		/* TODO */
@@ -71,6 +73,7 @@ class RequestHandler
 		else
 			$page = '404.tpl';
 		$TemplateReader->setPrev($this->prev);
+		$TemplateReader->setTabRoute($this->tabRoute);
 		$TemplateReader->setPage($context, $page, $theme);
 //		echo htmlspecialchars($TemplateReader->getHTML($context, $mainTpl));
 		echo $TemplateReader->getHTML($context, $mainTpl);

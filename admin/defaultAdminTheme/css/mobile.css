@@ -135,7 +135,44 @@ address {
 }
 
 body {
-  color: red;
+  /*	color: red;*/
+  display: grid;
+  grid-template-rows: 1fr 10fr 1fr;
+}
+
+h1 {
+  width: 100%;
+  background-color: orange;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1.5fr 8.5fr;
+}
+
+.admNav {
+  grid-column: 1;
+  background-color: pink;
+}
+.admNav a {
+  display: inline-block;
+  width: 100%;
+  text-decoration: none;
+  padding: 0.2em;
+  padding-left: 0.5em;
+}
+.admNav a:hover {
+  background-color: magenta;
+}
+
+.admCore {
+  grid-column: 2;
+  background-color: cian;
+  padding: 1em;
+}
+
+footer {
+  background-color: silver;
 }
 
 /*# sourceMappingURL=mobile.css.map */

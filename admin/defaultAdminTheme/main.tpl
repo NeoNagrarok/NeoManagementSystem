@@ -1,8 +1,10 @@
 [?connect:admin]
 [#header]
-[?disconnect]
 <main>
-	[$page]
+	[#parts/menu]
+	<section class="admCore">
+		[$page]
+	</section>
 </main>
 [#footer]
 [?loadJs:admin]

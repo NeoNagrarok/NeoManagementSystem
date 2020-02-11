@@ -15,6 +15,11 @@
 			$this->tabVar['prev'] = $prev;
 		}
 		
+		public function setTabRoute($tabRoute)
+		{
+			$this->tabVar['tabRoute'] = $tabRoute;
+		}
+		
 		public function setPage($context, $page, $theme)
 		{
 //			echo $context . '/' . $theme . '/' . $page . '<br />';
@@ -54,6 +59,7 @@
 			$args[0] = isset($func[1]) ? $func[1] . '/' . $this->theme : $args[0];
 			$args[1] = &$this->listIf;
 			$args[2] = &$this;
+			$args[3] = &$this->tabVar['tabRoute'];
 			if (function_exists($func[0]))
 				return $func[0]($this->tabVar['prev'], $args);
 		}
@@ -108,6 +114,7 @@
 		private $tabVar;
 		private $theme;
 		private $listIf;
+		private $tabRoute;
 	}
 
 ?>
