@@ -1,4 +1,6 @@
 <?php
+	define('__DB__', 'nms');
+
 	session_start();
 	
 	include_once 'core/RequestHandler/RequestHandler.php';

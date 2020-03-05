@@ -41,6 +41,7 @@ class RequestHandler
 	public function display($TemplateReader)
 	{
 		$tabContext['admin'] = 'admin'; /* [routeVar] = 'folder where to search index.tpl' */
+		$tabContext['install'] = 'install';
 		$context = 'themes'; /* Default folder where to search index.tpl */
 		
 		/* TODO get the good list of pages from where data are stored !!! */
@@ -49,6 +50,7 @@ class RequestHandler
 		$tabPages['admin']['home'] = 'tpl';
 		$tabPages['admin']['addContent'] = 'tpl';
 		$tabPages['admin']['content'] = 'tpl';
+		$tabPages['install']['home'] = 'tpl';
 		$page = 'home';
 		
 		/* TODO */
@@ -59,10 +61,10 @@ class RequestHandler
 		{
 			if (isset($tabContext[$this->tabRoute[0]]))
 				$context = $tabContext[$this->tabRoute[0]];
-			if ($this->tabRoute[0] != 'admin')
+			if ($this->tabRoute[0] == 'theme')
 				$page = $this->tabRoute[0];
 			else
-				$theme = 'defaultAdminTheme';
+				$theme = 'default' . ucfirst($context) . 'Theme';
 				/* TODO put here the code to choose an other admin theme if we had set an other theme for our cms ! */
 		}
 		$mainTpl = $context . '/' . $theme . '/index.tpl';

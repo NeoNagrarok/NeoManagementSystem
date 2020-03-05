@@ -137,7 +137,7 @@ address {
 body {
   /*	color: red;*/
   display: grid;
-  grid-template-rows: 1fr 10fr 1fr;
+  grid-template-rows: 10% 10fr 10%;
 }
 
 h1 {
@@ -167,8 +167,43 @@ main {
 
 .admCore {
   grid-column: 2;
-  background-color: cian;
+  /*padding: 1em;*/
+  display: grid;
+  grid-template-columns: 3fr 25%;
+  /*	grid-template-rows: 1fr 7fr;*/
+}
+.admCore h2 {
+  padding-left: 1em;
+  padding-top: 1em;
+  max-height: 10%;
+}
+.admCore section:first-of-type {
+  grid-column: 1;
   padding: 1em;
+}
+.admCore section:last-of-type {
+  grid-row: 1/8;
+  grid-column: 2;
+  padding: 1em;
+  background-color: grey;
+}
+
+.indent {
+  margin-left: 2em;
+}
+
+.admTextarea {
+  resize: none;
+}
+
+textarea {
+  resize: none;
+}
+
+.radio, .checkbox {
+  display: inline-block;
+  padding: 0.5em;
+  background-color: silver;
 }
 
 footer {
