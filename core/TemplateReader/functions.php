@@ -196,7 +196,7 @@ function admMenu($prev, &$args)
 	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$return = '';
-	foreach ($db->query('select type from contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel order by `order`') as $row)
+	foreach ($db->query('select type from ' . __DB_PREFIX__ . 'contentModel as content left join ' . __DB_PREFIX__ . 'link_contentModel_lang as link on content.id=link.id_contentModel order by `order`') as $row)
 		$return .= '<a href="' . $prev . 'content/' . $row['type'] . '">' . urldecode($row['type']) . '</a>';
 	return $return;
 }
@@ -242,9 +242,9 @@ function addContent($prev, &$args)
 		$order = (int) $_POST['contentOrder'] * 10;
 		include_once 'core/DBTools/DBTools.php';
 		$dbt = DBTools::getInstance();
-		$dbt->insert('contentModel', ['order' => $order]);
+		$dbt->insert(__DB_PREFIX__ . 'contentModel', ['order' => $order]);
 		$dbt->insert(
-			'link_contentModel_lang',
+			__DB_PREFIX__ . 'link_contentModel_lang',
 			[
 				'id_contentModel'	=> $dbt->lastInsertId(),
 				'iso_code_lang'		=> DBTools::getMeta('defaultLanguage'),
@@ -300,7 +300,7 @@ function insertRadio($prev, &$args)
 			return '';
 		include_once 'core/DBTools/DBTools.php';
 		$db = DBTools::getDB(__DB__);
-		$prepReq = $db->prepare("select `inner` from contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel where type=:type");
+		$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 		$prepReq->bindParam(':type', $row);
 		$prepReq->execute();
 		$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
@@ -313,7 +313,7 @@ function insertRadio($prev, &$args)
 //		echo '</pre>';
 		$jsonEncoded = json_encode($json);
 //		echo $jsonEncoded;
-		$prepReq = $db->prepare("UPDATE contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
+		$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
 		$prepReq->bindParam(':type', $row);
 		$prepReq->bindParam(':inner', $jsonEncoded);
 		$prepReq->execute();
@@ -349,7 +349,7 @@ function insertCheckbox($prev, &$args)
 
 		include_once 'core/DBTools/DBTools.php';
 		$db = DBTools::getDB(__DB__);
-		$prepReq = $db->prepare("select `inner` from contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel where type=:type");
+		$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 		$prepReq->bindParam(':type', $row);
 		$prepReq->execute();
 		$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
@@ -362,7 +362,7 @@ function insertCheckbox($prev, &$args)
 //		echo '</pre>';
 		$jsonEncoded = json_encode($json);
 //		echo $jsonEncoded;
-		$prepReq = $db->prepare("UPDATE contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
+		$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
 		$prepReq->bindParam(':type', $row);
 		$prepReq->bindParam(':inner', $jsonEncoded);
 		$prepReq->execute();
@@ -385,7 +385,7 @@ function insertField($prev, &$args)
 		return '';
 	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
-	$prepReq = $db->prepare("select `inner` from contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel where type=:type");
+	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 	$prepReq->bindParam(':type', $args[3][2]);
 //	echo '<pre>';
 	$prepReq->execute();
@@ -414,7 +414,7 @@ function insertField($prev, &$args)
 
 	$jsonEncoded = json_encode($json);
 //	echo $jsonEncoded;
-	$prepReq = $db->prepare("UPDATE contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
+	$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
 	$prepReq->bindParam(':type', $args[3][2]);
 	$prepReq->bindParam(':inner', $jsonEncoded);
 	$prepReq->execute();
@@ -436,7 +436,7 @@ function listContentInner($prev, &$args)
 //	echo urldecode($contentType) . '<hr />';
 	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
-	$prepReq = $db->prepare("select type, `inner` from contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel where type=:type");
+	$prepReq = $db->prepare("select type, `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 	$prepReq->bindParam(':type', $contentType);
 	$prepReq->execute();
 	$fetchResult = $prepReq->fetchAll();
@@ -547,7 +547,7 @@ function deleteOption($prev, &$args)
 	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$type = urldecode($args[3][2]);
-	$prepReq = $db->prepare("select `inner` from contentModel left join link_contentModel_lang as link on contentModel.id = link.id_contentModel where type=:type");
+	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel where type=:type");
 	$prepReq->bindParam(':type', $type);
 	$prepReq->execute();
 	$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
@@ -564,7 +564,7 @@ function deleteOption($prev, &$args)
 	
 	$jsonEncoded = json_encode($json);
 //	echo $jsonEncoded;
-	$prepReq = $db->prepare("UPDATE contentModel left join link_contentModel_lang as link on contentModel.id = link.id_contentModel SET `inner` = :inner WHERE type = :type");
+	$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel SET `inner` = :inner WHERE type = :type");
 	$prepReq->bindParam(':type', $type);
 	$prepReq->bindParam(':inner', $jsonEncoded);
 	$prepReq->execute();
@@ -581,7 +581,7 @@ function deleteCheckbox($prev, &$args)
 	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$type = urldecode($args[3][2]);
-	$prepReq = $db->prepare("select `inner` from contentModel left join link_contentModel_lang as link on contentModel.id = link.id_contentModel where type=:type");
+	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel where type=:type");
 	$prepReq->bindParam(':type', $type);
 	$prepReq->execute();
 	$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
@@ -598,7 +598,7 @@ function deleteCheckbox($prev, &$args)
 	
 	$jsonEncoded = json_encode($json);
 //	echo $jsonEncoded;
-	$prepReq = $db->prepare("UPDATE contentModel left join link_contentModel_lang as link on contentModel.id = link.id_contentModel SET `inner` = :inner WHERE type = :type");
+	$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel SET `inner` = :inner WHERE type = :type");
 	$prepReq->bindParam(':type', $type);
 	$prepReq->bindParam(':inner', $jsonEncoded);
 	$prepReq->execute();
@@ -615,7 +615,7 @@ function deleteField($prev, &$args)
 	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$type = urldecode($args[3][2]);
-	$prepReq = $db->prepare("select `inner` from contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel where type=:type");
+	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 	$prepReq->bindParam(':type', $type);
 	$prepReq->execute();
 	$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
@@ -624,7 +624,7 @@ function deleteField($prev, &$args)
 //		print_r($json);
 	$jsonEncoded = json_encode($json);
 //	echo $jsonEncoded;
-	$prepReq = $db->prepare("UPDATE contentModel left join link_contentModel_lang as link on contentModel.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
+	$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
 	$prepReq->bindParam(':type', $type);
 	$prepReq->bindParam(':inner', $jsonEncoded);
 	$prepReq->execute();

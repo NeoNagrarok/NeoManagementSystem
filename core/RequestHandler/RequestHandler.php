@@ -40,6 +40,7 @@ class RequestHandler
 
 	public function display($TemplateReader)
 	{
+		/* TODO may be we can define context and pages in other php file which can used as configuration file ???
 		$tabContext['admin'] = 'admin'; /* [routeVar] = 'folder where to search index.tpl' */
 		$tabContext['install'] = 'install';
 		$context = 'themes'; /* Default folder where to search index.tpl */
