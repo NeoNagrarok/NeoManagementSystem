@@ -131,6 +131,11 @@ class DBTools
 		self::setMeta('defaultLanguage', 'FR');
 	}
 	
+	public function defaultTheme()
+	{
+		self::setMeta('theme', 'default');
+	}
+	
 	public function installDone()
 	{
 		return self::setMeta('installed', 'true');

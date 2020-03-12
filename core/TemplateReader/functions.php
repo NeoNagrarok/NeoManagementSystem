@@ -1,5 +1,6 @@
 <?php
 
+//#tpl install
 function start()
 {
 	include_once 'core/security/security.php';
@@ -7,12 +8,12 @@ function start()
 	{
 		if (htmlget(${$start = 'start'}))
 		{
-			include_once 'core/DBTools/DBTools.php';
 			if (!DBTools::isInstalled())
 			{
 				$dbObj = DBTools::getInstance();
 				$dbObj->install();
 				$dbObj->defaultLanguageSetting();
+				$dbObj->defaultTheme();
 				$dbObj->installDone();
 				return '<a href="?">Back</a><br />installed<br />
 					<a href="/admin">Back office</a><br />
@@ -26,6 +27,7 @@ function start()
 	return '';
 }
 
+//#tpl install
 function remove()
 {
 	// TODO need to verify if we already have installed the cms
@@ -34,7 +36,6 @@ function remove()
 	{
 		if (htmlget(${$remove = 'remove'}))
 		{
-			include_once 'core/DBTools/DBTools.php';
 			if (DBTools::isInstalled())
 			{
 				$dbObj = DBTools::getInstance();
@@ -49,17 +50,20 @@ function remove()
 	return '';
 }
 
-function bodyOn($prev, $args)
+//#global
+function bodyOn($args)
 {
 	return '<body id="test">';
 }
 
-function bodyOf($prev, $args)
+//#global
+function bodyOf($args)
 {
 	return '</body></html>';
 }
 
-function loadCss($prev, $args)
+//#global
+function loadCss($args)
 {
 	$dir = $args[0] . '/';
 	$css = '';
@@ -76,11 +80,12 @@ function loadCss($prev, $args)
 	}
 	foreach($cssForeach as $cssFile)
 		if (preg_match('/.*\.css$/', $cssFile))
-			$css .= '<link rel="stylesheet" href="' . $prev . $dir . 'css/' . $cssFile . '" />';
+			$css .= '<link rel="stylesheet" href="' . RequestHandler::getPrev() . $dir . 'css/' . $cssFile . '" />';
 	return $css;
 }
 
-function loadJs($prev, $args)
+//#global
+function loadJs($args)
 {
 	$dir = $args[0] . '/';
 	$js = '';
@@ -97,13 +102,13 @@ function loadJs($prev, $args)
 	}
 	foreach($jsForeach as $jsFile)
 		if (preg_match('/.*\.js$/', $jsFile))
-			$js .= '<script src="' . $prev . $dir . 'js/' . $jsFile . '"></script>';
+			$js .= '<script src="' . RequestHandler::getPrev() . $dir . 'js/' . $jsFile . '"></script>';
 	return $js;
 }
 
-function connect($prev, $args)
+//#tpl admin
+function connect($args)
 {
-	include_once 'core/DBTools/DBTools.php';
 	if (!DBTools::isInstalled())
 	{
 		session_destroy();
@@ -123,6 +128,7 @@ function connect($prev, $args)
 					$connectForm .= '<p>' . $arrayError[$_GET['error']] . '</p>';
 			}
 			$TemplateReader = $args[2];
+			$prev = RequestHandler::getPrev();
 			echo $TemplateReader->parser(getContentFile($args[0] . '/metaHead.tpl')) . bodyOn($prev, $args) . $TemplateReader->parser(getContentFile($args[0] . '/parts/connectForm.tpl')) . bodyOf($prev, $args);
 			exit();
 		}
@@ -149,7 +155,8 @@ function connect($prev, $args)
 	}
 }
 
-function disconnect($prev, $args)
+//#tpl admin
+function disconnect($args)
 {
 	if (isset($_SESSION['logged']))
 	{
@@ -166,7 +173,8 @@ function disconnect($prev, $args)
 	return '';
 }
 
-function ifRank($prev, &$args)
+//#global
+function ifRank(&$args)
 {
 	$rank = explode('/', $args[0])[0];
 	if (end($args[1]) === 'true')
@@ -178,7 +186,8 @@ function ifRank($prev, &$args)
 	return '';
 }
 
-function fi($prev, &$args)
+//#global
+function fi(&$args)
 {
 	$rank = explode('/', $args[0])[0];
 	if (isset($args[1][$rank]))
@@ -190,10 +199,10 @@ function fi($prev, &$args)
 	return '';
 }
 
-function admMenu($prev, &$args)
+//#tpl admin
+function admMenu(&$args)
 {
-	$prev = preg_replace('/^..\//', '', $prev);
-	include_once 'core/DBTools/DBTools.php';
+	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
 	$db = DBTools::getDB(__DB__);
 	$return = '';
 	foreach ($db->query('select type from ' . __DB_PREFIX__ . 'contentModel as content left join ' . __DB_PREFIX__ . 'link_contentModel_lang as link on content.id=link.id_contentModel order by `order`') as $row)
@@ -201,9 +210,10 @@ function admMenu($prev, &$args)
 	return $return;
 }
 
-function getContentTitle($prev, &$args)
+//#tpl admin
+function getContentTitle(&$args)
 {
-	$prev = preg_replace('/^..\//', '', $prev);
+	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
 	if (!isset($args[3][2]))
 	{
 		header('location: ' . $prev);
@@ -212,26 +222,30 @@ function getContentTitle($prev, &$args)
 	return urldecode($args[3][2]);
 }
 
-function addContentLink($prev, &$args)
+//#tpl admin
+function addContentLink(&$args)
 {
-	$prev = preg_replace('/^..\//', '', $prev);
+	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
 	return '<a href="' . $prev . 'addContent">Add content</a><hr />';
 }
 
-function  removeRefreshBehavior($prev, &$args)
+//#global
+function  removeRefreshBehavior(&$args)
 {
 	include_once 'libs/form/form.php';
 	return setInputRandomSession();
 }
 
-function getSemiPrev($prev, &$args)
+//#tpl admin
+function getSemiPrev(&$args)
 {
-	if (count(explode('/', $prev)) >= 5)
+	if (count(explode('/', RequestHandler::getPrev())) >= 5)
 		return '../../';
 	return './';
 }
 
-function addContent($prev, &$args)
+//#tpl admin
+function addContent(&$args)
 {
 	include_once 'libs/form/form.php';
 	if (!getInputRandomSession())
@@ -240,7 +254,6 @@ function addContent($prev, &$args)
 	{
 		$title = urlencode($_POST['contentTitle']);
 		$order = (int) $_POST['contentOrder'] * 10;
-		include_once 'core/DBTools/DBTools.php';
 		$dbt = DBTools::getInstance();
 		$dbt->insert(__DB_PREFIX__ . 'contentModel', ['order' => $order]);
 		$dbt->insert(
@@ -257,7 +270,8 @@ function addContent($prev, &$args)
 	return '';
 }
 
-function lastFieldAdded($prev, &$args)
+//#tpl admin
+function lastFieldAdded(&$args)
 {
 	if (isset($_POST['addField']))
 	{
@@ -271,15 +285,16 @@ function lastFieldAdded($prev, &$args)
 		$form .= '<input type="hidden" name="type" value="' . $lastFieldAdded . '" />';
 		$form .= '<br />';
 		$form .= '<button type="submit">Add</button>';
-		$form .= removeRefreshBehavior($prev, $args);
+		$form .= removeRefreshBehavior($args);
 		$form .= '</form>';
 		return $form;
 	}
 }
 
-function insertRadio($prev, &$args)
+//#tpl admin
+function insertRadio(&$args)
 {
-	$prev = preg_replace('/^..\//', '', $prev);
+	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
 	if (!isset($args[3][2]))
 	{
 		header('location: ' . $prev);
@@ -298,7 +313,6 @@ function insertRadio($prev, &$args)
 		$option = $_POST[$key . 'Content'];
 		if(!$option)
 			return '';
-		include_once 'core/DBTools/DBTools.php';
 		$db = DBTools::getDB(__DB__);
 		$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 		$prepReq->bindParam(':type', $row);
@@ -321,9 +335,10 @@ function insertRadio($prev, &$args)
 	return '';
 }
 
-function insertCheckbox($prev, &$args)
+//#tpl admin
+function insertCheckbox(&$args)
 {
-	$prev = preg_replace('/^..\//', '', $prev);
+	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
 	if (!isset($args[3][2]))
 	{
 		header('location: ' . $prev);
@@ -346,8 +361,6 @@ function insertCheckbox($prev, &$args)
 //		echo $row . ' ' . $field . ' ' . $checkbox;
 		if(!$checkbox)
 			return '';
-
-		include_once 'core/DBTools/DBTools.php';
 		$db = DBTools::getDB(__DB__);
 		$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 		$prepReq->bindParam(':type', $row);
@@ -370,9 +383,10 @@ function insertCheckbox($prev, &$args)
 	return '';
 }
 
-function insertField($prev, &$args)
+//#tpl admin
+function insertField(&$args)
 {
-	$prev = preg_replace('/^..\//', '', $prev);
+	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
 	if (!isset($args[3][2]))
 	{
 		header('location: ' . $prev);
@@ -383,7 +397,6 @@ function insertField($prev, &$args)
 		return '';
 	if (!getInputRandomSession())
 		return '';
-	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 	$prepReq->bindParam(':type', $args[3][2]);
@@ -421,12 +434,13 @@ function insertField($prev, &$args)
 	return '';
 }
 
-function listContentInner($prev, &$args)
+//#tpl admin
+function listContentInner(&$args)
 {
 //	echo '<pre>';
 //	print_r($_POST);
 //	echo '</pre>';
-	$prev = preg_replace('/^..\//', '', $prev);
+	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
 	if (!isset($args[3][2]))
 	{
 		header('location: ' . $prev);
@@ -434,7 +448,6 @@ function listContentInner($prev, &$args)
 	}
 	$contentType = $args[3][2];
 //	echo urldecode($contentType) . '<hr />';
-	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$prepReq = $db->prepare("select type, `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
 	$prepReq->bindParam(':type', $contentType);
@@ -538,13 +551,13 @@ function listContentInner($prev, &$args)
 	return $result;
 }
 
-function deleteOption($prev, &$args)
+//#tpl admin
+function deleteOption(&$args)
 {
 	if (!isset($args[3][2]))
 		return '';
 	if (!isset($args[3][3]) || !isset($args[3][4]) || $args[3][3] != 'delete-opt')
 		return '';
-	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$type = urldecode($args[3][2]);
 	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel where type=:type");
@@ -572,13 +585,13 @@ function deleteOption($prev, &$args)
 	return '';
 }
 
-function deleteCheckbox($prev, &$args)
+//#tpl admin
+function deleteCheckbox(&$args)
 {
 	if (!isset($args[3][2]))
 		return '';
 	if (!isset($args[3][3]) || !isset($args[3][4]) || $args[3][3] != 'delete-chk')
 		return '';
-	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$type = urldecode($args[3][2]);
 	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel where type=:type");
@@ -606,13 +619,13 @@ function deleteCheckbox($prev, &$args)
 	return '';
 }
 
-function deleteField($prev, &$args)
+//#tpl admin
+function deleteField(&$args)
 {
 	if (!isset($args[3][2]))
 		return '';
 	if (!isset($args[3][3]) || !isset($args[3][4]) || $args[3][3] != 'delete')
 		return '';
-	include_once 'core/DBTools/DBTools.php';
 	$db = DBTools::getDB(__DB__);
 	$type = urldecode($args[3][2]);
 	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");

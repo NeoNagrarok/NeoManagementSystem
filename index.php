@@ -10,6 +10,8 @@
 	
 	include_once 'core/RequestHandler/RequestHandler.php';
 	include_once 'core/TemplateReader/TemplateReader.php';
+	include_once 'core/DBTools/DBTools.php';
+	include_once 'core/TemplateReader/functions.php';
 	
 	if (__DEBUG__)
 	{
@@ -17,8 +19,7 @@
 		ini_set('display_startup_errors', 1);
 		error_reporting(E_ALL);
 	}
-	
-	$TemplateReader = new TemplateReader();
-	$RequestHandler = new RequestHandler();
-	$RequestHandler->display($TemplateReader);
+
+	RequestHandler::getInstance();
+	TemplateReader::getInstance()->display();
 ?>
