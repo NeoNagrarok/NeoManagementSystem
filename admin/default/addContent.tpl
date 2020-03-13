@@ -1,4 +1,4 @@
-[?addContent]
+
 <h2>
 	Add content
 </h2>

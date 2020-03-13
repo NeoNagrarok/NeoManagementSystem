@@ -1,4 +1,3 @@
-[?connect:admin]
 [#header]
 <main>
 	[#parts/menu]

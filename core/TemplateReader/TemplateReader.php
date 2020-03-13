@@ -15,16 +15,23 @@
 			*	[routeVar] = 'folder where to search index.tpl'
 			*	example : ['admin'] = 'admin' need a admin folder in root folder.
 			*/
+			$this->controllers['admin'] = 'get';
+			$this->controllers['addContent'] = 'get';
+			$this->controllers['content'] = 'get';
+			
 			$this->contexts['admin'] = 'admin';
 			$this->contexts['install'] = 'install';
 			/* TODO get the good list of pages from where data are stored !!! */
+			/* NOTE may be a view or controller ! */
 			$this->pages['themes']['home'] = 'tpl';
 			$this->pages['themes']['adminTest'] = 'tpl';
 			$this->pages['themes']['aaa'] = 'tpl';
 			$this->pages['themes']['bbb'] = 'tpl';
+			
 			$this->pages['admin']['home'] = 'tpl';
 			$this->pages['admin']['addContent'] = 'tpl';
 			$this->pages['admin']['content'] = 'tpl';
+			
 			$this->pages['install']['home'] = 'tpl';
 		}
 		
@@ -34,14 +41,51 @@
 				self::$singleton = new TemplateReader();  
 			return self::$singleton;
 		}
+
+		public static function getTabVar()
+		{
+			return self::$tabVar;
+		}
+		
+		public function getContext()
+		{
+			return $this->context;
+		}
+		
+		public function getTheme()
+		{
+			return $this->theme;
+		}
+		
+		public function setTabVar($index, $value = null)
+		{
+			if (!$value)
+				$value = $this->getHTML();
+			self::$tabVar[$index] = $value;
+		}
 		
 		public function getHTML($tpl)
 		{
-//			echo $tpl . '<br />';
-			$contentTpl = getContentFile($tpl);
-//			echo htmlspecialchars($contentTpl) . '<hr />';
-			$html = $this->parser($contentTpl);
-			return $html;
+			$explode = explode('/', $tpl);
+			$controllerName = explode('.', end($explode))[0];
+			if (isset($this->controllers[$controllerName]))
+			{
+				$args[0] = $this->context . '/' . $this->theme;
+				$args[0] = isset($func[1]) ? $func[1] . '/' . $this->theme : $args[0];
+				$args[1] = &$this->listIf;
+				$args[2] = &$this;
+				$args[3] = &self::$tabVar['tabRoute'];
+				$class = $controllerName . 'Controller';
+				$mainController = $this->context . '/' . $this->theme . '/controllers/' . $class . '.php';
+				include_once $mainController;
+				$method = $this->controllers[$controllerName];
+				$instance = $class::getInstance($class);
+				$instance->caller($args);
+				/* TODO put here the call of the methd which call other some methods defined in classController */
+				return $instance->$method($tpl);
+			}
+			else
+				return $this->parser(getContentFile($tpl));		
 		}
 		
 		private function funcInclude($value)
@@ -50,23 +94,30 @@
 			return $this->getHTML($file);
 		}
 		
-		private function funcFunction($value)
+		private function funcFunction($value = null)
 		{
 			$func = explode(':', preg_replace('/\[\?(.*:?.*)]/', '$1', $value));
-			$args[0] = 'themes/' . $this->theme;
-			$args[0] = isset($func[1]) ? $func[1] . '/' . $this->theme : $args[0];
+			$exec = array_shift($func);
+			$args[0] = $this->context . '/' . $this->theme;
+//			$args[0] = isset($func[1]) ? $func[1] . '/' . $this->theme : $args[0];
 			$args[1] = &$this->listIf;
 			$args[2] = &$this;
-			$args[3] = &$this->tabVar['tabRoute'];
-			if (function_exists($func[0]))
-				return $func[0]($args);
+			$args[3] = &self::$tabVar['tabRoute'];
+			if (isset($func[1]))
+			{
+				$args[4] = $func;
+				$args[0] = implode('/', $func);
+			}
+			
+			if (function_exists($exec))
+				return $exec($args);
 		}
 		
 		private function funcVariable($value)
 		{
 			$var = preg_replace('/\[\$(.*)]/', '$1', $value);
-			if (isset($this->tabVar[$var]))
-				return $this->tabVar[$var];
+			if (isset(self::$tabVar[$var]))
+				return self::$tabVar[$var];
 			return 'This value doesn\'t exist.';
 		}
 		
@@ -107,43 +158,41 @@
 			}
 			return $html;
 		}
-		
+
 		public function display()
 		{
-			$tabRoute = RequestHandler::getTabRoute();
+			self::$tabVar['tabRoute'] = RequestHandler::getTabRoute();
 			$prev = RequestHandler::getPrev();
-			if (isset($tabRoute[0]))
+			if (isset(self::$tabVar['tabRoute'][0]))
 			{
-				if (isset($this->contexts[$tabRoute[0]]))
+				if (isset($this->contexts[self::$tabVar['tabRoute'][0]]))
 				{
-					$this->context = $this->contexts[$tabRoute[0]];
-					if (isset($tabRoute[1]))
-						$this->page = $tabRoute[1];
+					$this->context = $this->contexts[self::$tabVar['tabRoute'][0]];
+					if (isset(self::$tabVar['tabRoute'][1]))
+						$this->page = self::$tabVar['tabRoute'][1];
 				}
 				else
-					$this->page = $tabRoute[0];
-					/* TODO put here the code to choose an other admin theme if we had set an other theme for our cms ! */
+					$this->page = self::$tabVar['tabRoute'][0];
 			}
-			$mainTpl = $this->context . '/' . $this->theme . '/index.tpl';
 			if (isset($this->pages[$this->context][$this->page]))
 				$this->page = $this->page . '.' . $this->pages[$this->context][$this->page];
 			else
 				$this->page = '404.tpl';
-			$this->tabVar['tabRoute'] = $tabRoute;
-	//		echo $context . '/' . $theme . '/' . $page . '<br />';
-			$this->tabVar['page'] = $this->getHTML($this->context . '/' . $this->theme . '/' . $this->page);
-			$this->tabVar['description'] = 'defaultDescription';
-			$this->tabVar['title'] = 'defaultTitle';
+//			echo $this->context . '/' . $this->theme . '/' . $this->page . '<br />';
+
+			self::$tabVar['page'] = $this->getHTML($this->context . '/' . $this->theme . '/' . $this->page);
+			self::$tabVar['description'] = 'defaultDescription';
+			self::$tabVar['title'] = 'defaultTitle';
 			// TODO find a way to fill these two previous variables with data in tpl files ? May be thanks to php interpreter ? Or with an other verb ?
 			// TODO idem for FB markup and other markup like it, which they will be implemented later (not ptiority)
-	//		echo htmlspecialchars($TemplateReader->getHTML($mainTpl));
-			echo $this->getHTML($mainTpl);
+			echo $this->getHTML($this->context . '/' . $this->theme . '/' . $this->context . '.tpl');
 		}
 
-		private $tabVar;
+		private static $tabVar;
 		private $listIf;
 //		private $tabRoute;
 
+		private $controllers;
 		private $contexts;
 		private $context;
 		private $theme;

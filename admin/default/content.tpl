@@ -1,9 +1,3 @@
-[?insertRadio]
-[?insertCheckbox]
-[?insertField]
-[?deleteOption]
-[?deleteCheckbox]
-[?deleteField]
 <h2>
 	[?getContentTitle]
 </h2>

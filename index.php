@@ -8,10 +8,11 @@
 
 	session_start();
 	
-	include_once 'core/RequestHandler/RequestHandler.php';
-	include_once 'core/TemplateReader/TemplateReader.php';
 	include_once 'core/DBTools/DBTools.php';
+	include_once 'core/RequestHandler/RequestHandler.php';
+	include_once 'core/Controller/Controller.php';
 	include_once 'core/TemplateReader/functions.php';
+	include_once 'core/TemplateReader/TemplateReader.php';
 	
 	if (__DEBUG__)
 	{

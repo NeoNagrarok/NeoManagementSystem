@@ -106,73 +106,6 @@ function loadJs($args)
 	return $js;
 }
 
-//#tpl admin
-function connect($args)
-{
-	if (!DBTools::isInstalled())
-	{
-		session_destroy();
-		header('location: /');
-		exit;
-	}
-	if (explode('/', $args[0])[0] === 'admin' && !isset($_SESSION['logged']))
-	{
-		if (!isset($_POST['adId']) || !isset($_POST['adPw']))
-		{
-			/* TODO get the good error message depending on the language settled ! */
-			$connectForm = '';
-			if (isset($_GET['error']))
-			{
-				$arrayError[1] = 'Mauvais identifiants !';
-				if (isset($arrayError[$_GET['error']]))
-					$connectForm .= '<p>' . $arrayError[$_GET['error']] . '</p>';
-			}
-			$TemplateReader = $args[2];
-			$prev = RequestHandler::getPrev();
-			echo $TemplateReader->parser(getContentFile($args[0] . '/metaHead.tpl')) . bodyOn($prev, $args) . $TemplateReader->parser(getContentFile($args[0] . '/parts/connectForm.tpl')) . bodyOf($prev, $args);
-			exit();
-		}
-		else
-		{
-			$adId = htmlspecialchars($_POST['adId']);
-			$adPw = htmlspecialchars($_POST['adPw']);
-			$log = $_SERVER['REMOTE_ADDR'] . '>' . date('Y-m-d H:i:s') . '>' . $adId .'>';
-			/* TODO get real identifiants from the place where data are stored ! */
-			$logged = true;
-			if ($adId !== 'Test' || $adPw !== 'test')
-				$logged = false;
-			else
-			{
-				$_SESSION['logged'] = str_shuffle(random_bytes(8) . (~$adId) . random_bytes(8) . ~($adPw) . random_bytes(8));
-				$_SESSION['rank'] = 'admin'; // TODO Get the right admin rank where data are stored
-				/* TODO create good sessions corresponding to good permissions by example */
-			}
-			$log .= ($logged ? 'true' : 'false') . "\n";
-			createFile('logs/connect.log', $log);
-			if (!$logged)
-				header('location: ./?error=1');
-		}
-	}
-}
-
-//#tpl admin
-function disconnect($args)
-{
-	if (isset($_SESSION['logged']))
-	{
-		if (isset($_POST['disconnect']))
-		{
-			session_destroy();
-			header('location: ./');
-		}
-		else
-			return '<form action="./" method="post">
-						<input type="submit" name="disconnect" value="Se déconnecter" />
-					</form>';
-	}
-	return '';
-}
-
 //#global
 function ifRank(&$args)
 {
@@ -199,7 +132,7 @@ function fi(&$args)
 	return '';
 }
 
-//#tpl admin
+//#tpl admin hook
 function admMenu(&$args)
 {
 	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
@@ -210,7 +143,7 @@ function admMenu(&$args)
 	return $return;
 }
 
-//#tpl admin
+//#tpl admin hook
 function getContentTitle(&$args)
 {
 	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
@@ -222,7 +155,7 @@ function getContentTitle(&$args)
 	return urldecode($args[3][2]);
 }
 
-//#tpl admin
+//#tpl admin hook
 function addContentLink(&$args)
 {
 	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
@@ -236,7 +169,7 @@ function  removeRefreshBehavior(&$args)
 	return setInputRandomSession();
 }
 
-//#tpl admin
+//#tpl admin hook
 function getSemiPrev(&$args)
 {
 	if (count(explode('/', RequestHandler::getPrev())) >= 5)
@@ -244,33 +177,7 @@ function getSemiPrev(&$args)
 	return './';
 }
 
-//#tpl admin
-function addContent(&$args)
-{
-	include_once 'libs/form/form.php';
-	if (!getInputRandomSession())
-		return '';
-	if (isset($_POST['contentTitle']) && isset($_POST['contentOrder']))
-	{
-		$title = urlencode($_POST['contentTitle']);
-		$order = (int) $_POST['contentOrder'] * 10;
-		$dbt = DBTools::getInstance();
-		$dbt->insert(__DB_PREFIX__ . 'contentModel', ['order' => $order]);
-		$dbt->insert(
-			__DB_PREFIX__ . 'link_contentModel_lang',
-			[
-				'id_contentModel'	=> $dbt->lastInsertId(),
-				'iso_code_lang'		=> DBTools::getMeta('defaultLanguage'),
-				'type'				=> $title
-			]
-		);		
-		header('location: ../content/' . $title);
-		exit;
-	}
-	return '';
-}
-
-//#tpl admin
+//#tpl admin hook
 function lastFieldAdded(&$args)
 {
 	if (isset($_POST['addField']))
@@ -291,150 +198,7 @@ function lastFieldAdded(&$args)
 	}
 }
 
-//#tpl admin
-function insertRadio(&$args)
-{
-	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
-	if (!isset($args[3][2]))
-	{
-		header('location: ' . $prev);
-		exit;
-	}
-	if (!in_array('addRadioButton', $_POST))
-		return '';
-	$arrKeys = array_keys($_POST, 'addRadioButton');
-	include_once 'libs/form/form.php';
-	if (!getInputRandomSession())
-		return '';
-	foreach ($arrKeys as $key)
-	{
-		$row = $args[3][2];
-		$field = str_replace('addRadio', '', urldecode($key));
-		$option = $_POST[$key . 'Content'];
-		if(!$option)
-			return '';
-		$db = DBTools::getDB(__DB__);
-		$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
-		$prepReq->bindParam(':type', $row);
-		$prepReq->execute();
-		$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
-		if (!isset($json[$field]['options']))
-			$json[$field] = array_merge($json[$field], ['options' => [0 => $option]]);
-		else
-			$json[$field]['options'][] = $option;
-//		echo '<pre>';
-//		print_r($json);
-//		echo '</pre>';
-		$jsonEncoded = json_encode($json);
-//		echo $jsonEncoded;
-		$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
-		$prepReq->bindParam(':type', $row);
-		$prepReq->bindParam(':inner', $jsonEncoded);
-		$prepReq->execute();
-	}
-	return '';
-}
-
-//#tpl admin
-function insertCheckbox(&$args)
-{
-	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
-	if (!isset($args[3][2]))
-	{
-		header('location: ' . $prev);
-		exit;
-	}
-	if (!in_array('addCheckboxButton', $_POST))
-		return '';
-	$arrKeys = array_keys($_POST, 'addCheckboxButton');
-//	echo '<pre>';
-//	print_r($arrKeys);
-//	echo '</pre>';
-	include_once 'libs/form/form.php';
-	if (!getInputRandomSession())
-		return '';
-	foreach ($arrKeys as $key)
-	{
-		$row = $args[3][2];
-		$field = str_replace('addCheckbox', '', urldecode($key));
-		$checkbox = $_POST[$key . 'Content'];
-//		echo $row . ' ' . $field . ' ' . $checkbox;
-		if(!$checkbox)
-			return '';
-		$db = DBTools::getDB(__DB__);
-		$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
-		$prepReq->bindParam(':type', $row);
-		$prepReq->execute();
-		$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
-		if (!isset($json[$field]['checkboxes']))
-			$json[$field] = array_merge($json[$field], ['checkboxes' => [0 => $checkbox]]);
-		else
-			$json[$field]['checkboxes'][] = $checkbox;
-//		echo '<pre>';
-//		print_r($json);
-//		echo '</pre>';
-		$jsonEncoded = json_encode($json);
-//		echo $jsonEncoded;
-		$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
-		$prepReq->bindParam(':type', $row);
-		$prepReq->bindParam(':inner', $jsonEncoded);
-		$prepReq->execute();
-	}
-	return '';
-}
-
-//#tpl admin
-function insertField(&$args)
-{
-	$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
-	if (!isset($args[3][2]))
-	{
-		header('location: ' . $prev);
-		exit;
-	}
-	include_once 'libs/form/form.php';
-	if (!htmlpost(${$lastFieldAdded = 'lastFieldAdded'}) || !htmlpost(${$type = 'type'}) || !htmlpost(${$order = 'order'}) || !$lastFieldAdded || !$order)
-		return '';
-	if (!getInputRandomSession())
-		return '';
-	$db = DBTools::getDB(__DB__);
-	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
-	$prepReq->bindParam(':type', $args[3][2]);
-//	echo '<pre>';
-	$prepReq->execute();
-//	echo '</pre>';
-	$fetchResult = $prepReq->fetchAll();
-	if (isset($fetchResult[0]) && isset($fetchResult[0]['inner']))
-		$json = json_decode($fetchResult[0]['inner'], true);
-	else
-		$json = [];
-//	print_r($json);
-//	if (!$json)
-//		$json = [];
-
-//	echo $lastFieldAdded . ' ' . $type;
-
-	$lastFieldAdded = preg_replace('/[^0-9a-zA-Z ]*/', '', $lastFieldAdded);
-	if (!isset($json[$lastFieldAdded]))
-		$json = array_merge($json, [$lastFieldAdded => ['type' => $type, 'order' => $order]]);
-	else
-	{
-		$json[$lastFieldAdded]['type'] = $type;
-		$json[$lastFieldAdded]['order'] = $order;
-	}
-
-//	print_r($json);
-
-	$jsonEncoded = json_encode($json);
-//	echo $jsonEncoded;
-	$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
-	$prepReq->bindParam(':type', $args[3][2]);
-	$prepReq->bindParam(':inner', $jsonEncoded);
-	$prepReq->execute();
-	return '';
-}
-
-//#tpl admin
+//#tpl admin hook
 function listContentInner(&$args)
 {
 //	echo '<pre>';
@@ -549,100 +313,6 @@ function listContentInner(&$args)
 	$result .= '<button type="submit" name="save">Save</button>';
 	$result .= '</form>';
 	return $result;
-}
-
-//#tpl admin
-function deleteOption(&$args)
-{
-	if (!isset($args[3][2]))
-		return '';
-	if (!isset($args[3][3]) || !isset($args[3][4]) || $args[3][3] != 'delete-opt')
-		return '';
-	$db = DBTools::getDB(__DB__);
-	$type = urldecode($args[3][2]);
-	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel where type=:type");
-	$prepReq->bindParam(':type', $type);
-	$prepReq->execute();
-	$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
-
-//	echo urldecode($args[3][4]);
-	$arrRowOption = explode('-', urldecode($args[3][4]));
-//	echo '<pre>';
-//	print_r($json);
-//	echo '</pre>';
-	
-	if (isset($json[$arrRowOption[0]]))
-		if (($test = array_search($arrRowOption[1], $json[$arrRowOption[0]]['options'])) !== false)
-			unset($json[$arrRowOption[0]]['options'][$test]);
-	
-	$jsonEncoded = json_encode($json);
-//	echo $jsonEncoded;
-	$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel SET `inner` = :inner WHERE type = :type");
-	$prepReq->bindParam(':type', $type);
-	$prepReq->bindParam(':inner', $jsonEncoded);
-	$prepReq->execute();
-	header('location: ../../');
-	return '';
-}
-
-//#tpl admin
-function deleteCheckbox(&$args)
-{
-	if (!isset($args[3][2]))
-		return '';
-	if (!isset($args[3][3]) || !isset($args[3][4]) || $args[3][3] != 'delete-chk')
-		return '';
-	$db = DBTools::getDB(__DB__);
-	$type = urldecode($args[3][2]);
-	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel where type=:type");
-	$prepReq->bindParam(':type', $type);
-	$prepReq->execute();
-	$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
-
-//	echo urldecode($args[3][4]);
-	$arrRowCheckbox = explode('-', urldecode($args[3][4]));
-//	echo '<pre>';
-//	print_r($json);
-//	echo '</pre>';
-	
-	if (isset($json[$arrRowCheckbox[0]]))
-		if (($test = array_search($arrRowCheckbox[1], $json[$arrRowCheckbox[0]]['checkboxes'])) !== false)
-			unset($json[$arrRowCheckbox[0]]['checkboxes'][$test]);
-	
-	$jsonEncoded = json_encode($json);
-//	echo $jsonEncoded;
-	$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id = link.id_contentModel SET `inner` = :inner WHERE type = :type");
-	$prepReq->bindParam(':type', $type);
-	$prepReq->bindParam(':inner', $jsonEncoded);
-	$prepReq->execute();
-	header('location: ../../');
-	return '';
-}
-
-//#tpl admin
-function deleteField(&$args)
-{
-	if (!isset($args[3][2]))
-		return '';
-	if (!isset($args[3][3]) || !isset($args[3][4]) || $args[3][3] != 'delete')
-		return '';
-	$db = DBTools::getDB(__DB__);
-	$type = urldecode($args[3][2]);
-	$prepReq = $db->prepare("select `inner` from " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel where type=:type");
-	$prepReq->bindParam(':type', $type);
-	$prepReq->execute();
-	$json = json_decode($prepReq->fetchAll()[0]['inner'], true);
-	if (isset($json[urldecode($args[3][4])]))
-		unset($json[urldecode($args[3][4])]);
-//		print_r($json);
-	$jsonEncoded = json_encode($json);
-//	echo $jsonEncoded;
-	$prepReq = $db->prepare("UPDATE " . __DB_PREFIX__ . "contentModel as content left join " . __DB_PREFIX__ . "link_contentModel_lang as link on content.id=link.id_contentModel SET `inner` = :inner WHERE type = :type");
-	$prepReq->bindParam(':type', $type);
-	$prepReq->bindParam(':inner', $jsonEncoded);
-	$prepReq->execute();
-	header('location: ../../');
-	return '';
 }
 
 ?>
