@@ -90,14 +90,16 @@ class DBTools
 				`id` int unsigned auto_increment not null,
 				`id_contentModel` int unsigned not null,
 				`code_chmod` varchar(3) not null,
-				`title` varchar(50),
-				`slug` varchar(20),
 				`date` date,
 				`formData` json,
 				PRIMARY KEY (`id`),
 				FOREIGN KEY (id_contentModel) REFERENCES ' . __DB_PREFIX__ . 'contentModel (id)
 			)';
 			self::$singleton->db->exec($sql);
+			
+//			$sql = 'CREATE TABLE IF NOT EXISTS `'.__DB_PREFIX__.'` (
+//			)';
+//			self::$singleton->db->exec($sql);
 			
 			return true;
 		}

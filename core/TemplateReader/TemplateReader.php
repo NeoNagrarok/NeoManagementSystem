@@ -11,28 +11,13 @@
 			$this->context = 'themes';
 			$this->theme = DBTools::getMeta('theme');
 			$this->page = 'home';
-			/*
-			*	[routeVar] = 'folder where to search index.tpl'
-			*	example : ['admin'] = 'admin' need a admin folder in root folder.
-			*/
-			$this->controllers['admin'] = 'get';
-			$this->controllers['addContent'] = 'get';
-			$this->controllers['content'] = 'get';
 			
-			$this->contexts['admin'] = 'admin';
-			$this->contexts['install'] = 'install';
-			/* TODO get the good list of pages from where data are stored !!! */
-			/* NOTE may be a view or controller ! */
-			$this->pages['themes']['home'] = 'tpl';
-			$this->pages['themes']['adminTest'] = 'tpl';
-			$this->pages['themes']['aaa'] = 'tpl';
-			$this->pages['themes']['bbb'] = 'tpl';
-			
-			$this->pages['admin']['home'] = 'tpl';
-			$this->pages['admin']['addContent'] = 'tpl';
-			$this->pages['admin']['content'] = 'tpl';
-			
-			$this->pages['install']['home'] = 'tpl';
+			/* NOTE May be main routes must be in database ? I don't know */
+			$routes = json_decode(getContentFile('routes.json'), true);
+			$this->controllers = $routes['controllers'];
+			$this->contexts = $routes['contexts'];
+			$this->pages = $routes['pages'];
+
 		}
 		
 		public static function getInstance()
@@ -78,6 +63,7 @@
 				$class = $controllerName . 'Controller';
 				$mainController = $this->context . '/' . $this->theme . '/controllers/' . $class . '.php';
 				include_once $mainController;
+				$this->currentControllers[$class] = $class;;
 				$method = $this->controllers[$controllerName];
 				$instance = $class::getInstance($class);
 				$instance->caller($args);
@@ -109,6 +95,17 @@
 				$args[0] = implode('/', $func);
 			}
 			
+			if (isset($this->currentControllers))
+				foreach ($this->currentControllers as $controller)
+				{
+					$instance = $controller::getInstance($controller);
+					if (method_exists($instance, 'hook_' . $exec))
+					{
+						$exec = 'hook_' . $exec;
+						return $instance->$exec($args);
+					}
+				}
+			// NOTE for general hooks (in function.php => TODO we need te rename and move this file !!!
 			if (function_exists($exec))
 				return $exec($args);
 		}
@@ -190,9 +187,9 @@
 
 		private static $tabVar;
 		private $listIf;
-//		private $tabRoute;
 
 		private $controllers;
+		private $currentControllers;
 		private $contexts;
 		private $context;
 		private $theme;

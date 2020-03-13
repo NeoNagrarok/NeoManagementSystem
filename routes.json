@@ -1,0 +1,35 @@
+{
+	"controllers":
+		{
+			"admin":				"get",
+			"addContent":			"get",
+			"content":				"get",
+			"installCore":			"get",
+			"admMenu":				"get"
+		},
+	"contexts":
+		{
+			"admin":				"admin",
+			"install":				"install"
+		},
+	"pages":
+		{
+			"themes":
+				{
+					"home":			"tpl",
+					"adminTest":	"tpl",
+					"aaa":			"tpl",
+					"bbb":			"tpl"
+				},
+			"admin":
+				{
+					"home":			"tpl",
+					"addContent":	"tpl",
+					"content":		"tpl"
+				},
+			"install":
+				{
+					"home":			"tpl"
+				}
+		}
+}

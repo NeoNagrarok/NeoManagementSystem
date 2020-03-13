@@ -2,7 +2,7 @@
 	[?getContentTitle]
 </h2>
 <section>
-	[?listContentInner]
+	[?listContentForm]
 </section>
 <section>
 	<form class="addContentField" method="post" action="[?getSemiPrev]">

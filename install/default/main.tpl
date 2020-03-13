@@ -1,7 +1,7 @@
 [#header]
 <main>
 	<section class="installCore">
-		[$page]
+		[#installCore]
 	</section>
 </main>
 [#footer]

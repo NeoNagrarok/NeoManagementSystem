@@ -1,6 +1,6 @@
 [#header]
 <main>
-	[#parts/menu]
+	[#parts/admMenu]
 	<section class="admCore">
 		[$page]
 	</section>
