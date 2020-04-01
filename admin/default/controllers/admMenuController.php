@@ -20,7 +20,13 @@
 		public function hook_addContentLink(&$args)
 		{
 			$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
-			return '<a href="' . $prev . 'addContent">Add content</a><hr />';
+			return '<a href="' . $prev . 'addContent">Add content</a>';
+		}
+		
+		public function hook_modulesLink($args)
+		{
+			$prev = preg_replace('/^..\//', '', RequestHandler::getPrev());
+			return '<a href="' . $prev . 'modules">Handle modules</a>';
 		}
 	}
 ?>

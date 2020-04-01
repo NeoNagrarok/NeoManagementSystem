@@ -67,7 +67,7 @@
 				$method = $this->controllers[$controllerName];
 				$instance = $class::getInstance($class);
 				$instance->caller($args);
-				/* TODO put here the call of the methd which call other some methods defined in classController */
+				/* TODO put here the call of the method which call other some methods defined in classController */
 				return $instance->$method($tpl);
 			}
 			else
@@ -105,7 +105,8 @@
 						return $instance->$exec($args);
 					}
 				}
-			// NOTE for general hooks (in function.php => TODO we need te rename and move this file !!!
+			// we verify if it is not a module hook ! With it's own if structure in order to not override context controller method ;) 
+//			echo $exec . '<hr />';
 			if (function_exists($exec))
 				return $exec($args);
 		}

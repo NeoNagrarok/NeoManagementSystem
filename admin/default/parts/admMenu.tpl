@@ -1,6 +1,8 @@
 <nav class="admNav">
 	[?admMenu]
 	[?addContentLink]
+	<hr />
+	[?modulesLink]
 	handleLanguages
 	<br />
 	handleUsers

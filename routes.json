@@ -5,7 +5,8 @@
 			"addContent":			"get",
 			"content":				"get",
 			"installCore":			"get",
-			"admMenu":				"get"
+			"admMenu":				"get",
+			"modules":				"get"
 		},
 	"contexts":
 		{
@@ -25,7 +26,8 @@
 				{
 					"home":			"tpl",
 					"addContent":	"tpl",
-					"content":		"tpl"
+					"content":		"tpl",
+					"modules":		"tpl"
 				},
 			"install":
 				{

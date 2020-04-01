@@ -5,14 +5,6 @@
 	define('__DB_USER__', 'root');
 	define('__DB_PASSWORD__', 'dadfba16');
 	define('__DEBUG__', true);
-
-	session_start();
-	
-	include_once 'core/DBTools/DBTools.php';
-	include_once 'core/RequestHandler/RequestHandler.php';
-	include_once 'core/Controller/Controller.php';
-	include_once 'core/hooks.php';
-	include_once 'core/TemplateReader/TemplateReader.php';
 	
 	if (__DEBUG__)
 	{
@@ -20,6 +12,15 @@
 		ini_set('display_startup_errors', 1);
 		error_reporting(E_ALL);
 	}
+
+	session_start();
+	
+	require_once 'core/DBTools/DBTools.php';
+	require_once 'core/RequestHandler/RequestHandler.php';
+	require_once 'core/Controller/Controller.php';
+	require_once 'core/ModuleGlobalController/ModuleGlobalController.php';
+	require_once 'core/hooks.php';
+	require_once 'core/TemplateReader/TemplateReader.php';
 
 	RequestHandler::getInstance();
 	TemplateReader::getInstance()->display();
