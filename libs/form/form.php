@@ -1,7 +1,5 @@
 <?php
 
-include_once 'libs/security/security.php';
-
 /*
 if (!isset($_SESSION['randomSession']))
 	$_SESSION['randomSession'] = uniqid(); // Plus besoin de redirection

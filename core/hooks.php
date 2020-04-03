@@ -85,7 +85,7 @@ function fi(&$args)
 //#global
 function  removeRefreshBehavior(&$args)
 {
-	include_once 'libs/form/form.php';
+	include_once 'core/form/form.php';
 	return setInputRandomSession();
 }
 ?>

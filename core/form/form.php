@@ -1,6 +1,6 @@
 <?php
 
-include_once 'libs/security/security.php';
+include_once 'core/security/security.php';
 
 /*
 if (!isset($_SESSION['randomSession']))

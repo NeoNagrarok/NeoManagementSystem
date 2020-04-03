@@ -15,6 +15,8 @@
 
 	session_start();
 	
+	require_once 'core/security/security.php';
+	require_once 'core/files/files.php';
 	require_once 'core/DBTools/DBTools.php';
 	require_once 'core/RequestHandler/RequestHandler.php';
 	require_once 'core/Controller/Controller.php';

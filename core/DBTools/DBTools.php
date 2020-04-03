@@ -53,6 +53,15 @@ class DBTools
 			self::$singleton->db->exec($sql);
 			self::$singleton->db->query("use " . __DB__);
 			
+			$sql = 'CREATE TABLE IF NOT EXISTS `' . __DB_PREFIX__ . 'chmod` (
+				`code` varchar(3) not null,
+				`read` tinyint(1),
+				`write` tinyint(1),
+				`execute` tinyint(1),
+				PRIMARY KEY (`code`)
+			)';
+			self::$singleton->db->exec($sql);
+			
 			$sql = 'CREATE TABLE IF NOT EXISTS `' . __DB_PREFIX__ . 'meta` (
 				`id` int unsigned auto_increment not null,
 				`key` varchar(50),
@@ -93,10 +102,55 @@ class DBTools
 				`date` date,
 				`formData` json,
 				PRIMARY KEY (`id`),
-				FOREIGN KEY (id_contentModel) REFERENCES ' . __DB_PREFIX__ . 'contentModel (id)
+				FOREIGN KEY (id_contentModel) REFERENCES ' . __DB_PREFIX__ . 'contentModel (id),
+				FOREIGN KEY (code_chmod) REFERENCES ' . __DB_PREFIX__ . 'chmod (code)
+			)';
+			self::$singleton->db->exec($sql);
+
+			$sql = 'CREATE TABLE IF NOT EXISTS `'.__DB_PREFIX__.'moduleHook` (
+			`hookName` varchar(40) not null,
+			`moduleName` varchar(40) not null
 			)';
 			self::$singleton->db->exec($sql);
 			
+			$sql = 'CREATE TABLE IF NOT EXISTS `' . __DB_PREFIX__ . 'userGroup` (
+				`id` int unsigned auto_increment not null,
+				`taxonomy` varchar(20),
+				PRIMARY KEY (`id`)
+			)';
+			self::$singleton->db->exec($sql);
+			
+			$sql = 'CREATE TABLE IF NOT EXISTS `' . __DB_PREFIX__ . 'user` (
+				`id` int unsigned auto_increment not null,
+				`pseudo` varchar(50),
+				`email` varchar(64),
+				`password` varchar(50),
+				`id_group` int unsigned not null,
+				PRIMARY KEY (`id`),
+				FOREIGN KEY (id_group) REFERENCES ' . __DB_PREFIX__ . 'userGroup (id)
+			)';
+			self::$singleton->db->exec($sql);
+			
+			$sql = 'CREATE TABLE IF NOT EXISTS `' . __DB_PREFIX__ . 'link_content_chmod_user` (
+				`id_content` int unsigned not null,
+				`code_chmod` varchar(3),
+				`id_user` int unsigned not null,
+				FOREIGN KEY (id_content) REFERENCES ' . __DB_PREFIX__ . 'content (id),
+				FOREIGN KEY (code_chmod) REFERENCES ' . __DB_PREFIX__ . 'chmod (code),
+				FOREIGN KEY (id_user) REFERENCES ' . __DB_PREFIX__ . 'user (id)
+			)';
+			self::$singleton->db->exec($sql);
+
+			$sql = 'CREATE TABLE IF NOT EXISTS `' . __DB_PREFIX__ . 'link_content_chmod_userGroup` (
+				`id_content` int unsigned not null,
+				`code_chmod` varchar(3),
+				`id_userGroup` int unsigned not null,
+				FOREIGN KEY (id_content) REFERENCES ' . __DB_PREFIX__ . 'content (id),
+				FOREIGN KEY (code_chmod) REFERENCES ' . __DB_PREFIX__ . 'chmod (code),
+				FOREIGN KEY (id_userGroup) REFERENCES ' . __DB_PREFIX__ . 'userGroup (id)
+			)';
+			self::$singleton->db->exec($sql);
+
 //			$sql = 'CREATE TABLE IF NOT EXISTS `'.__DB_PREFIX__.'` (
 //			)';
 //			self::$singleton->db->exec($sql);
@@ -187,6 +241,60 @@ class DBTools
 		return $prepReq->execute();
 	}
 	
+	public static function tableExists($table)
+	{
+		// Try a select statement against the table
+		// Run it in try/catch in case PDO is in ERRMODE_EXCEPTION.
+		try
+		{
+		    $result = self::$singleton->db->prepare('SELECT 1 FROM ' . __DB_PREFIX__ . $table . ' LIMIT 1')->execute();
+		}
+		catch (Exception $e)
+		{
+		    // We got an exception == table not found
+		    return false;
+		}
+		// Result is either boolean FALSE (no table found) or PDOStatement Object (table found)
+		return $result !== false;
+	}
+	
+	// TODO with list of field it will be better ... => $fieldList
+	public static function createTable($table, $fieldList = [], $constraints = '')
+	{
+		try
+		{
+			$fieldString = '';
+			foreach ($fieldList as $field => $description)
+				$fieldString .= '`' . $field . '` ' . $description . ',';
+			$fieldString = preg_replace('/,$/', '', $fieldString);
+			$sql = 'CREATE TABLE IF NOT EXISTS `' . __DB_PREFIX__ . $table . '` (
+					' . $fieldString . '
+					' . $constraints . '
+				)';
+//			echo $sql . '<br />';
+		    $result = self::$singleton->db->exec($sql);
+//		    echo $result;
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+		return $result !== false;
+	}
+
+	public static function dropTable($table)
+	{
+		try
+		{
+		    $result = self::$singleton->db->exec('DROP TABLE IF EXISTS ' . __DB_PREFIX__ . $table);
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+		return $result !== false;
+	}
+
 	private static $singleton = null;
 	private $db;
 }

@@ -1,5 +1,4 @@
 <?php
-	include_once 'core/files/files.php';
 
 	class TemplateReader
 	{
@@ -9,7 +8,9 @@
 			$this->listIf['__first__'] = 'true';
 			
 			$this->context = 'themes';
-			$this->theme = DBTools::getMeta('theme');
+			$this->theme = 'default';
+			if (DBTools::isInstalled())
+				$this->theme = DBTools::getMeta('theme');
 			$this->page = 'home';
 			
 			/* NOTE May be main routes must be in database ? I don't know */
@@ -82,6 +83,7 @@
 		
 		private function funcFunction($value = null)
 		{
+//			echo '<pre>';
 			$func = explode(':', preg_replace('/\[\?(.*:?.*)]/', '$1', $value));
 			$exec = array_shift($func);
 			$args[0] = $this->context . '/' . $this->theme;
@@ -96,19 +98,40 @@
 			}
 			
 			if (isset($this->currentControllers))
+			{
 				foreach ($this->currentControllers as $controller)
 				{
 					$instance = $controller::getInstance($controller);
+					$methodDisplay = '';
 					if (method_exists($instance, 'hook_' . $exec))
 					{
+//						echo '::: controller method :::<br />' . $exec . '<br />';
 						$exec = 'hook_' . $exec;
-						return $instance->$exec($args);
+						$methodDisplay .= $instance->$exec($args);
 					}
+					$mod = null;
+					if (ModuleGlobalController::getModule('hook_' . $exec, $mod))
+					{
+//						echo '::: module method :::<br />' . $exec . '<br />';
+						$exec = 'hook_' . $exec;
+						if ($mod)
+							for($i = 0;isset($mod[$i]); $i++)
+							{
+								include_once 'modules/' . $mod[$i] . '/' . $mod[$i] . '.php';
+								$methodDisplay .= $mod[$i]::getInstance($mod[$i])->$exec($args);
+							}
+						// TODO if i think right, here there is hook_module vefication. We need to change the install and may be the uninstall methods in order to make a good table for this verification.
+					}
+					if ($methodDisplay)
+						return $methodDisplay;
 				}
-			// we verify if it is not a module hook ! With it's own if structure in order to not override context controller method ;) 
-//			echo $exec . '<hr />';
+			}
 			if (function_exists($exec))
+			{
+//				echo '--- global hook ---<br />' . $exec . '<br />';
 				return $exec($args);
+			}
+//			echo '</pre>';
 		}
 		
 		private function funcVariable($value)

@@ -10,7 +10,7 @@
 		
 		protected function addContent(&$args)
 		{
-			include_once 'libs/form/form.php';
+			include_once 'core/form/form.php';
 			if (!getInputRandomSession())
 				return '';
 			if (isset($_POST['contentTitle']) && isset($_POST['contentOrder']))

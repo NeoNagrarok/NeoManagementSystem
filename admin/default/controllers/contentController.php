@@ -25,7 +25,7 @@
 			if (!in_array('addRadioButton', $_POST))
 				return '';
 			$arrKeys = array_keys($_POST, 'addRadioButton');
-			include_once 'libs/form/form.php';
+			include_once 'core/form/form.php';
 			if (!getInputRandomSession())
 				return '';
 			foreach ($arrKeys as $key)
@@ -71,7 +71,7 @@
 		//	echo '<pre>';
 		//	print_r($arrKeys);
 		//	echo '</pre>';
-			include_once 'libs/form/form.php';
+			include_once 'core/form/form.php';
 			if (!getInputRandomSession())
 				return '';
 			foreach ($arrKeys as $key)
@@ -112,7 +112,7 @@
 				header('location: ' . $prev);
 				exit;
 			}
-			include_once 'libs/form/form.php';
+			include_once 'core/form/form.php';
 			if (!htmlpost(${$lastFieldAdded = 'lastFieldAdded'}) || !htmlpost(${$type = 'type'}) || !htmlpost(${$order = 'order'}) || !$lastFieldAdded || !$order)
 				return '';
 			if (!getInputRandomSession())

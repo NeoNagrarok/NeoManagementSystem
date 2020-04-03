@@ -1,7 +1,5 @@
 <?php
 
-include_once 'core/files/files.php';
-
 class RequestHandler
 {
 	private function __construct()

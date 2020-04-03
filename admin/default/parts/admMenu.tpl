@@ -3,6 +3,7 @@
 	[?addContentLink]
 	<hr />
 	[?modulesLink]
+	[?getConfigureCart]
 	handleLanguages
 	<br />
 	handleUsers
