@@ -8,6 +8,7 @@ Also make a config folder and put in one file all defines contained into index.p
 
 ## TODO
 
+- Do an input into logs/connect.log (which may be renamed) or eventually in other fil in logs/ for each admin command used (install / uninstall cms, create new contentModel, configure contentModel, add content, install / uninstall module, configure module etc.)
 - Make a real error handling
 - Make user handling
 - Make internationalization
